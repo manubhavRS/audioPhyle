@@ -1,9 +1,8 @@
-CREATE TABLE users(
+CREATE TABLE cards(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL,
+    user_id UUID references users(id),
+    card_number TEXT UNIQUE NOT NULL,
+    expire_date DATE NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );

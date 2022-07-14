@@ -1,9 +1,8 @@
-CREATE TABLE users(
+CREATE TABLE in_the_box(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pdt_id UUID REFERENCES products(id),
     name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL,
+    quantity INT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );

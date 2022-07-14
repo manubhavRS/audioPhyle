@@ -18,7 +18,7 @@ func SignUpUserHelper(user models.AddUserModel) (string, error) {
 		log.Printf("SignUpUserHelper Error: %v", err)
 		return "", err
 	}
-	err = database.Aph.Get(&userID, SQL, user.Name, pass, user.Email, user.Role)
+	err = database.Aph.Get(&userID, SQL, user.Name, user.Email, pass, user.Role)
 	if err != nil {
 		log.Printf("SignUpUserHelper Error: %v", err)
 		return "", err
@@ -28,9 +28,11 @@ func SignUpUserHelper(user models.AddUserModel) (string, error) {
 func FetchUserDetailsHelper(userID string) (models.UserModel, error) {
 	//language=SQL
 	SQL := `SELECT id,name,email,role 
-			from users`
+			from users 
+			where id=$1 and
+		    archived_at IS NULL`
 	var user models.UserModel
-	err := database.Aph.Get(&user, SQL, user.ID, user.Name, user.Email, user.Role)
+	err := database.Aph.Get(&user, SQL, userID)
 	if err != nil {
 		log.Printf("FetchUserDetailsHelper Error: %v", err)
 		return user, err
@@ -47,6 +49,35 @@ func FetchUserCredentialsHelper(userEmail string) (models.UserModel, error) {
 	err := database.Aph.Get(&user, SQL, userEmail)
 	if err != nil {
 		log.Printf("FetchUserCredentialsHelper Error: %v", err)
+		return user, err
+	}
+	return user, nil
+}
+func AddRoleHelper(userID, role string) error {
+	//language=SQL
+	SQL := `UPDATE users 
+			SET role=$1 
+			WHERE id=$2
+			archived_at IS NULL 
+			RETURNING id`
+	var uid string
+	err := database.Aph.Get(&uid, SQL, role, userID)
+	if err != nil {
+		log.Printf("AddRoleHelper Error: %v", err)
+		return err
+	}
+
+	return nil
+}
+func FetchAllUserHelper() ([]models.UserModel, error) {
+	//language=SQL
+	SQL := `SELECT id,name,email,role
+          FROM users
+          WHERE archived_at IS NULL`
+	var user []models.UserModel
+	err := database.Aph.Select(&user, SQL)
+	if err != nil {
+		log.Printf("FetchAllUserHelper Error: %v", err)
 		return user, err
 	}
 	return user, nil

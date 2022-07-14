@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+func UserFromContext(ctx context.Context) *models.UserModel {
+	return ctx.Value(utilities.ContextUserKey).(*models.UserModel)
+}
+
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
@@ -28,7 +32,7 @@ func GenerateJWT(user *models.UserModel) (string, error) {
 	claims := &models.Claims{
 		ID: user.ID,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+			ExpiresAt: utilities.FetchExpireTime().Unix(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -72,7 +76,7 @@ func JWTAuthMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 		log.Printf("JWT Token verified.")
-		ctx := context.WithValue(r.Context(), utilities.ContextUserKey, users)
+		ctx := context.WithValue(r.Context(), utilities.ContextUserKey, &users)
 		rec := statusRecorder{w, 200}
 		handler.ServeHTTP(&rec, r.WithContext(ctx))
 		if rec.status == 200 {
