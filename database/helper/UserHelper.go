@@ -74,10 +74,24 @@ func FetchAllUserHelper() ([]models.UserModel, error) {
 	SQL := `SELECT id,name,email,role
           FROM users
           WHERE archived_at IS NULL`
-	var user []models.UserModel
+	user := make([]models.UserModel, 0)
 	err := database.Aph.Select(&user, SQL)
 	if err != nil {
 		log.Printf("FetchAllUserHelper Error: %v", err)
+		return user, err
+	}
+	return user, nil
+}
+func FetchUserHelper(userID string) (models.UserModel, error) {
+	//language=SQL
+	SQL := `SELECT id,name,email,role
+          FROM users
+          WHERE id=$1 and 
+          archived_at IS NULL`
+	var user models.UserModel
+	err := database.Aph.Get(&user, SQL, userID)
+	if err != nil {
+		log.Printf("FetchUserHelper Error: %v", err)
 		return user, err
 	}
 	return user, nil

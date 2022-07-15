@@ -49,13 +49,13 @@ func FetchProductsHelper(pageNo string) ([]models.ProductModel, error) {
           LIMIT 10
           OFFSET $1
           `
-	var products []models.ProductModel
+	products := make([]models.ProductModel, 0)
 	page, err := strconv.ParseInt(pageNo, 10, 64)
 	if err != nil {
 		log.Printf("FetchProductsHelper Error: %v", err)
 		return nil, err
 	}
-	err = database.Aph.Select(&products, SQL, page*10)
+	err = database.Aph.Select(&products, SQL, (page-1)*10)
 	if err != nil {
 		log.Printf("FetchProductsHelper Error: %v", err)
 		return nil, err
@@ -70,13 +70,13 @@ func FetchProductsCategoryHelper(pageNo, category string) ([]models.ProductModel
           archived_at IS NULL
           LIMIT 10
           OFFSET $2`
-	var products []models.ProductModel
+	products := make([]models.ProductModel, 0)
 	page, err := strconv.ParseInt(pageNo, 10, 64)
 	if err != nil {
 		log.Printf("FetchProductsHelper Error: %v", err)
 		return nil, err
 	}
-	err = database.Aph.Select(&products, SQL, category, page*10)
+	err = database.Aph.Select(&products, SQL, category, (page-1)*10)
 	if err != nil {
 		log.Printf("FetchProductsHelper Error: %v", err)
 		return nil, err
@@ -89,8 +89,8 @@ func UpdateProductQuantity(cart models.CartModel, tx *sqlx.Tx) error {
 			from products p 
 			where p.id in (?) and
           	archived_at IS NULL`
-	var quantity []int
-	var productIDs []string
+	quantity := make([]int, 0)
+	productIDs := make([]string, 0)
 	for _, product := range cart.Products {
 		productIDs = append(productIDs, product.ProductID)
 	}
@@ -143,13 +143,39 @@ func FetchYouMayLikeHelper() ([]models.ProductModel, error) {
 	SQL := `SELECT id, name, category,price,about,quantity 
 			FROM products
 			WHERE archived_at IS NULL
-			ORDER random()                                    
+			ORDER BY RANDOM ()                                    
 			LIMIT 5`
-	var product []models.ProductModel
+	product := make([]models.ProductModel, 0)
 	err := database.Aph.Select(&product, SQL)
 	if err != nil {
-		log.Printf("FetchLatestProductHelper Error: %v", err)
+		log.Printf("FetchYouMayLikeHelper Error: %v", err)
 		return product, err
 	}
 	return product, nil
+}
+func AddProductAssetHelper(productAsset models.ProductAssetModel, tx *sqlx.Tx) (string, error) {
+	//language=SQL
+	SQL := `INSERT INTO product_assets(pdt_id,name) 
+		  VALUES($1,$2)
+		  RETURNING id`
+	var id string
+	err := tx.Get(&id, SQL, productAsset.ID, productAsset.AssetName)
+	if err != nil {
+		log.Printf("AddProductAssetHelper Error: %v", err)
+		return "", err
+	}
+	return id, nil
+}
+func FetchProductAssetHelper(productID string) ([]string, error) {
+	//language=SQL
+	SQL := `SELECT name 
+		  FROM product_assets 
+          WHERE pdt_id=$1 AND archived_at IS NULL`
+	names := make([]string, 0)
+	err := database.Aph.Select(&names, SQL, productID)
+	if err != nil {
+		log.Printf("FetchProductAssetHelper Error: %v", err)
+		return names, err
+	}
+	return names, nil
 }

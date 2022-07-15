@@ -8,7 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"log"
 	"strconv"
-	"time"
 )
 
 func FetchTotalCostHelper(products []models.AddCartProductModel) (float64, error) {
@@ -17,8 +16,8 @@ func FetchTotalCostHelper(products []models.AddCartProductModel) (float64, error
 					 from products p 
 					 where p.id 
 					 in (?) and archived_at IS NULL`
-	var costs []float64
-	var productsIDs []string
+	costs := make([]float64, 0)
+	productsIDs := make([]string, 0)
 	for _, product := range products {
 		productsIDs = append(productsIDs, product.ProductID)
 	}
@@ -73,9 +72,9 @@ func FetchCartDetailsHelper(cartID string) (models.CartModel, error) {
 			INNER JOIN products p
 			on cp.product_id=p.id
 			WHERE cart_id=$1 AND 
-            archived_at IS NULL`
+            cp.archived_at IS NULL`
 	var cartDetails models.CartModel
-	var cartProducts []models.AddCartProductModel
+	cartProducts := make([]models.AddCartProductModel, 0)
 	err := database.Aph.Select(&cartProducts, SQL, cartID)
 	if err != nil {
 		log.Printf("FetchCartDetailsHelper Error: %v ", err)
@@ -100,7 +99,7 @@ func FetchCartDetailsHelper(cartID string) (models.CartModel, error) {
 	return cartDetails, nil
 }
 func UpdateCartProductHelper(cart models.UpdateCartModel, tx *sqlx.Tx) error {
-	var productIDs []string
+	productIDs := make([]string, 0)
 	for _, product := range cart.Products {
 		productIDs = append(productIDs, product.ProductID)
 	}
@@ -128,10 +127,10 @@ func UpdateCartProductHelper(cart models.UpdateCartModel, tx *sqlx.Tx) error {
 func RemoveCartProductHelper(tx *sqlx.Tx) error {
 	//language=SQL
 	SQL := `Update cart_products 
-			SET archived_at=$1 
+			SET archived_at=CURRENT_TIMESTAMP
 			WHERE quantity=0 and
 			archived_at IS NULL`
-	_, err := tx.Exec(SQL, time.Now())
+	_, err := tx.Exec(SQL)
 	if err != nil {
 		log.Printf("RemoveCartProductHelper Error: %v", err)
 		return err

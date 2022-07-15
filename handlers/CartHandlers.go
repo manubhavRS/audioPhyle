@@ -38,13 +38,13 @@ func AddCartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte(cartID))
 }
-func UpdateCartProducts(w http.ResponseWriter, r *http.Request) {
+func UpdateCartProductsHandler(w http.ResponseWriter, r *http.Request) {
 	var signedUser *models.UserModel
 	signedUser = middlewares.UserFromContext(r.Context())
 	var cart models.UpdateCartModel
-	err := json.NewDecoder(r.Body).Decode(cart)
+	err := json.NewDecoder(r.Body).Decode(&cart)
 	if err != nil {
-		log.Printf("AddCartHandler: %v", err)
+		log.Printf("UpdateCartProductsHandler: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

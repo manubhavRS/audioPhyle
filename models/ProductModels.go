@@ -9,12 +9,10 @@ type AddProductModel struct {
 	About    string             `db:"about" json:"about"`
 	Quantity string             `db:"quantity" json:"quantity"`
 }
-
 type AddInTheBoxModel struct {
 	Name     string `db:"name" json:"name"`
 	Quantity string `db:"quantity" json:"quantity"`
 }
-
 type ProductModel struct {
 	ID       string `db:"id" json:"id"`
 	Name     string `db:"name" json:"name"`
@@ -22,4 +20,15 @@ type ProductModel struct {
 	Price    string `db:"price" json:"price"`
 	About    string `db:"about" json:"about"`
 	Quantity string `db:"quantity" json:"quantity"`
+}
+type ProductAssetModel struct {
+	ID        string `db:"id" json:"id"`
+	AssetName string `db:"name" json:"name"`
+}
+type ImageStructure struct {
+	ImageName string
+	URL       string
+}
+type ProductID struct {
+	ID string `db:"id" json:"id"`
 }

@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func AddOrder(w http.ResponseWriter, r *http.Request) {
+func AddOrderHandler(w http.ResponseWriter, r *http.Request) {
 	var signedUser *models.UserModel
 	signedUser = middlewares.UserFromContext(r.Context())
 	var order models.AddOrderModel
@@ -25,7 +25,6 @@ func AddOrder(w http.ResponseWriter, r *http.Request) {
 	order.UserID = signedUser.ID
 	cart, err := helper.FetchCartDetailsHelper(order.CartID)
 	if err != nil {
-		log.Printf("AddOrderHandler: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"audioPhile/database"
 	"audioPhile/database/helper"
 	"audioPhile/models"
+	"audioPhile/utilities"
 	"encoding/json"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -36,7 +37,7 @@ func AddProductHandler(w http.ResponseWriter, r *http.Request) {
 
 func FetchProductsHandler(w http.ResponseWriter, r *http.Request) {
 	pageNo := r.URL.Query().Get("pageNo")
-	var products []models.ProductModel
+	products := make([]models.ProductModel, 0)
 	products, err := helper.FetchProductsHelper(pageNo)
 	if err != nil {
 		log.Printf("FetchProductsHandler : %v", err)
@@ -53,7 +54,7 @@ func FetchProductsHandler(w http.ResponseWriter, r *http.Request) {
 func FetchProductsCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	pageNo := r.URL.Query().Get("pageNo")
 	category := r.URL.Query().Get("category")
-	var products []models.ProductModel
+	products := make([]models.ProductModel, 0)
 	products, err := helper.FetchProductsCategoryHelper(pageNo, category)
 	if err != nil {
 		log.Printf("FetchProductsHandler : %v", err)
@@ -85,6 +86,29 @@ func FetchYouMayLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jsonResponse, err := json.Marshal(product)
+	if err != nil {
+		log.Printf("Error happened in JSON marshal. Err: %v", err)
+	}
+	w.Write(jsonResponse)
+}
+func FetchProductAssetsHandler(w http.ResponseWriter, r *http.Request) {
+	var productID models.ProductID
+	err := json.NewDecoder(r.Body).Decode(&productID)
+	if err != nil {
+		log.Printf("FetchProductAssetsHandler: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	productAssets, err := helper.FetchProductAssetHelper(productID.ID)
+	if err != nil {
+		log.Printf("FetchProductAssetsHandler : %v", err)
+	}
+	productAssetURLS := make([]models.ImageStructure, 0)
+	for _, productAsset := range productAssets {
+		productAssetURL := utilities.CreateImageUrl(productAsset)
+		productAssetURLS = append(productAssetURLS, productAssetURL)
+	}
+	jsonResponse, err := json.Marshal(productAssetURLS)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
 	}
