@@ -11,8 +11,7 @@ import (
 )
 
 func AddCardHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var card models.AddCardModel
 	err := json.NewDecoder(r.Body).Decode(&card)
 	if err != nil {
@@ -47,8 +46,7 @@ func AddCardHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(cardID))
 }
 func RemoveCardHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var card models.RemoveCardIDModel
 	err := json.NewDecoder(r.Body).Decode(&card)
 	if err != nil {

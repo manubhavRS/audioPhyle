@@ -44,9 +44,13 @@ func FetchProductsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	jsonResponse, err := json.Marshal(products)
+
+	jsonResponse, err := utilities.JsonData(products)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+
 	}
 	w.Write(jsonResponse)
 }
@@ -61,9 +65,10 @@ func FetchProductsCategoryHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	jsonResponse, err := json.Marshal(products)
+	jsonResponse, err := utilities.JsonData(products)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	w.Write(jsonResponse)
 }
@@ -73,9 +78,11 @@ func FetchLatestProductHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	jsonResponse, err := json.Marshal(product)
+	jsonResponse, err := utilities.JsonData(product)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }
@@ -85,9 +92,11 @@ func FetchYouMayLike(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	jsonResponse, err := json.Marshal(product)
+	jsonResponse, err := utilities.JsonData(product)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }
@@ -108,9 +117,11 @@ func FetchProductAssetsHandler(w http.ResponseWriter, r *http.Request) {
 		productAssetURL := utilities.CreateImageUrl(productAsset)
 		productAssetURLS = append(productAssetURLS, productAssetURL)
 	}
-	jsonResponse, err := json.Marshal(productAssetURLS)
+	jsonResponse, err := utilities.JsonData(productAssetURLS)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }

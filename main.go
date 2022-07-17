@@ -4,10 +4,16 @@ import (
 	"audioPhile/database"
 	"audioPhile/server"
 	"fmt"
+	"os"
 )
 
 func main() {
-	err := database.ConnectAndMigrate("localhost", "5435", "audioPhile", "local", "local", database.SSLModeDisable)
+	host := os.Getenv("host")
+	port := os.Getenv("port")
+	databaseName := os.Getenv("database")
+	user := os.Getenv("user")
+	password := os.Getenv("password")
+	err := database.ConnectAndMigrate(host, port, databaseName, user, password, database.SSLModeDisable)
 	if err != nil {
 		panic(err)
 	}

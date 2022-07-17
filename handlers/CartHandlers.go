@@ -12,8 +12,7 @@ import (
 )
 
 func AddCartHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var cart models.AddCartModel
 	err := json.NewDecoder(r.Body).Decode(&cart)
 	if err != nil {
@@ -39,8 +38,7 @@ func AddCartHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(cartID))
 }
 func UpdateCartProductsHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var cart models.UpdateCartModel
 	err := json.NewDecoder(r.Body).Decode(&cart)
 	if err != nil {
@@ -68,8 +66,7 @@ func UpdateCartProductsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func AddCartProductHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var cart models.UpdateCartModel
 	err := json.NewDecoder(r.Body).Decode(&cart)
 	if err != nil {

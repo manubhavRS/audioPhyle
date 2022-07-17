@@ -2,12 +2,12 @@ package utilities
 
 import (
 	"audioPhile/models"
+	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"time"
 )
 
-const Secretkey string = "SuperSecretKey"
 const ContextUserKey string = "user"
 const TokenString = "Token"
 const ShippingCharges = 50
@@ -15,9 +15,11 @@ const ShippingCharges = 50
 func FetchExpectDateOfDelivery() time.Time {
 	return time.Now().Add(time.Hour * 120)
 }
+
 func FetchExpireTime() time.Time {
 	return time.Now().Add(time.Minute * 30)
 }
+
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
@@ -26,6 +28,11 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func JsonData(x interface{}) ([]byte, error) {
+	jsonResponse, err := json.Marshal(x)
+	return jsonResponse, err
 }
 
 func CreateImageUrl(imagePath string) models.ImageStructure {

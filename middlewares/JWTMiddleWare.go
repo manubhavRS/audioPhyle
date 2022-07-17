@@ -4,12 +4,12 @@ import (
 	"audioPhile/database/helper"
 	"audioPhile/models"
 	"audioPhile/utilities"
-	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/net/context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -27,8 +27,11 @@ func (rec *statusRecorder) WriteHeader(code int) {
 	rec.ResponseWriter.WriteHeader(code)
 }
 
+var secretkey string = os.Getenv("secretKey")
+
 func GenerateJWT(user *models.UserModel) (string, error) {
-	var mySigningKey = []byte(utilities.Secretkey)
+
+	var mySigningKey = []byte(secretkey)
 	claims := &models.Claims{
 		ID: user.ID,
 		StandardClaims: jwt.StandardClaims{
@@ -51,7 +54,7 @@ func JWTAuthMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		var mySigningKey = []byte(utilities.Secretkey)
+		var mySigningKey = []byte(secretkey)
 		var claims models.Claims
 		token, err := jwt.ParseWithClaims(r.Header[utilities.TokenString][0], &claims, func(token *jwt.Token) (interface{}, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
@@ -75,7 +78,7 @@ func JWTAuthMiddleware(handler http.Handler) http.Handler {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Printf("JWT Token verified.")
+		log.Printf("JWT Token verified")
 		ctx := context.WithValue(r.Context(), utilities.ContextUserKey, &users)
 		rec := statusRecorder{w, 200}
 		handler.ServeHTTP(&rec, r.WithContext(ctx))
@@ -90,7 +93,7 @@ func JWTAuthMiddleware(handler http.Handler) http.Handler {
 				w.Header().Set("Content-Type", "application/json")
 				resp := make(map[string]string)
 				resp["RefreshToken"] = refreshToken
-				jsonResponse, err := json.Marshal(resp)
+				jsonResponse, err := utilities.JsonData(resp)
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					return

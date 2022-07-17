@@ -34,9 +34,11 @@ func AdminSignUpUserHandler(w http.ResponseWriter, r *http.Request) {
 	resp["Name"] = "token"
 	resp["Value"] = tokenString
 	resp["Expires"] = utilities.FetchExpireTime().String()
-	jsonResponse, err := json.Marshal(resp)
+	jsonResponse, err := utilities.JsonData(resp)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }
@@ -62,9 +64,11 @@ func SignUpUserHandler(w http.ResponseWriter, r *http.Request) {
 	resp["Name"] = "token"
 	resp["Value"] = tokenString
 	resp["Expires"] = utilities.FetchExpireTime().String()
-	jsonResponse, err := json.Marshal(resp)
+	jsonResponse, err := utilities.JsonData(resp)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }
@@ -97,9 +101,11 @@ func SignInUserHandler(w http.ResponseWriter, r *http.Request) {
 	resp["Name"] = "token"
 	resp["Value"] = tokenString
 	resp["Expires"] = utilities.FetchExpireTime().String()
-	jsonResponse, err := json.Marshal(resp)
+	jsonResponse, err := utilities.JsonData(resp)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }
@@ -124,9 +130,11 @@ func FetchAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	jsonResponse, err := json.Marshal(user)
+	jsonResponse, err := utilities.JsonData(user)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }
@@ -158,9 +166,11 @@ func FetchUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	userDetails.Address = addresses
 	userDetails.Card = cards
-	jsonResponse, err := json.Marshal(userDetails)
+	jsonResponse, err := utilities.JsonData(userDetails)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.Write(jsonResponse)
 }

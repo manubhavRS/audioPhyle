@@ -10,8 +10,7 @@ import (
 )
 
 func AddAddressHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var address models.AddAddressModel
 	err := json.NewDecoder(r.Body).Decode(&address)
 	if err != nil {
@@ -28,8 +27,7 @@ func AddAddressHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(cardID))
 }
 func RemoveAddressHandler(w http.ResponseWriter, r *http.Request) {
-	var signedUser *models.UserModel
-	signedUser = middlewares.UserFromContext(r.Context())
+	signedUser := middlewares.UserFromContext(r.Context())
 	var address models.RemoveAddressIDModel
 	err := json.NewDecoder(r.Body).Decode(&address)
 	if err != nil {
