@@ -57,7 +57,7 @@ func AddRoleHelper(userID, role string) error {
 	//language=SQL
 	SQL := `UPDATE users 
 			SET role=$1 
-			WHERE id=$2
+			WHERE id=$2 AND
 			archived_at IS NULL 
 			RETURNING id`
 	var uid string

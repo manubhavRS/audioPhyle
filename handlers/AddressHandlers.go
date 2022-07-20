@@ -19,12 +19,18 @@ func AddAddressHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	address.UserID = signedUser.ID
+
 	cardID, err := helper.AddAddressHelper(address)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(cardID))
+
+	_, err = w.Write([]byte(cardID))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 func RemoveAddressHandler(w http.ResponseWriter, r *http.Request) {
 	signedUser := middlewares.UserFromContext(r.Context())
@@ -36,6 +42,7 @@ func RemoveAddressHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	address.UserID = signedUser.ID
+
 	err = helper.RemoveAddressHelper(address)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -3,11 +3,42 @@ package helper
 import (
 	"audioPhile/database"
 	"audioPhile/models"
+	"audioPhile/utilities"
 	"github.com/elgris/sqrl"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"log"
 	"strconv"
 )
+
+func AddCategoryHelper(category models.CategoryModel) (models.FetchCategoryModel, error) {
+	//language=SQL
+	SQL := `INSERT INTO categories(category)
+			values($1) 
+			Returning id`
+	var Fetchcategory models.FetchCategoryModel
+	err := database.Aph.Get(&Fetchcategory.ID, SQL, category.Category)
+	if err != nil {
+		log.Printf("AddCategoryHelper Error: %v", err)
+		return Fetchcategory, err
+	}
+	Fetchcategory.Category = category.Category
+
+	return Fetchcategory, nil
+}
+func FetchCategoryHelper() ([]models.FetchCategoryModel, error) {
+	//language=SQL
+	SQL := `SELECT id,category 
+			FROM categories 
+            WHERE archived_at IS NULL`
+	categoryList := make([]models.FetchCategoryModel, 0)
+	err := database.Aph.Select(&categoryList, SQL)
+	if err != nil {
+		log.Printf("FetchCategoryHelper Error: %v", err)
+		return categoryList, err
+	}
+	return categoryList, nil
+}
 
 func AddProductHelper(product models.AddProductModel, tx *sqlx.Tx) (string, error) {
 	//language=SQL
@@ -22,8 +53,8 @@ func AddProductHelper(product models.AddProductModel, tx *sqlx.Tx) (string, erro
 	}
 	return productID, nil
 }
+
 func AddInTheBoxHelper(inTheBoxList []models.AddInTheBoxModel, productID string, tx *sqlx.Tx) error {
-	//language=SQL
 	psql := sqrl.StatementBuilder.PlaceholderFormat(sqrl.Dollar)
 	insertBuilder := psql.Insert("in_the_box").Columns("pdt_id", "name", "quantity")
 	for _, inTheBox := range inTheBoxList {
@@ -41,26 +72,48 @@ func AddInTheBoxHelper(inTheBoxList []models.AddInTheBoxModel, productID string,
 	}
 	return nil
 }
-func FetchProductsHelper(pageNo string) ([]models.ProductModel, error) {
+func FetchProductsHelper(pageNo string) (models.ProductListModel, error) {
 	//language=SQL
-	SQL := `SELECT id,name,category,price,about,quantity
-          FROM products
-          WHERE archived_at IS NULL
-          LIMIT 10
-          OFFSET $1
-          `
-	products := make([]models.ProductModel, 0)
+	SQL := `WITH cte AS (
+    		SELECT *
+    		FROM   products
+			)
+			SELECT id,name,category,price,about,quantity,full_count
+			FROM  (
+          		TABLE  cte
+              	ORDER  BY id
+              	LIMIT  10
+              	OFFSET $1
+      		) sub
+          	RIGHT  JOIN (SELECT count(*) FROM cte) c(full_count) ON true;`
+	products := make([]models.ProductModelWithCount, 0)
+	pdtList := make([]models.ProductModel, 0)
+	var productsList models.ProductListModel
 	page, err := strconv.ParseInt(pageNo, 10, 64)
 	if err != nil {
 		log.Printf("FetchProductsHelper Error: %v", err)
-		return nil, err
+		return productsList, err
 	}
 	err = database.Aph.Select(&products, SQL, (page-1)*10)
 	if err != nil {
 		log.Printf("FetchProductsHelper Error: %v", err)
-		return nil, err
+		return productsList, err
 	}
-	return products, nil
+	var totalCount int
+	for _, pdt := range products {
+		var product models.ProductModel
+		product.ID = pdt.ID
+		product.Name = pdt.Name
+		product.Price = pdt.Price
+		product.About = pdt.About
+		product.Category = pdt.Category
+		product.Quantity = pdt.Quantity
+		pdtList = append(pdtList, product)
+		totalCount = pdt.TotalCount
+	}
+	productsList.TotalCount = totalCount
+	productsList.Products = pdtList
+	return productsList, nil
 }
 func FetchProductsCategoryHelper(pageNo, category string) ([]models.ProductModel, error) {
 	//language=SQL
@@ -178,4 +231,87 @@ func FetchProductAssetHelper(productID string) ([]string, error) {
 		return names, err
 	}
 	return names, nil
+}
+
+func FetchProductsSearchHelper(productSearch models.ProductSearchModel) (models.ProductListModel, error) {
+	//language=SQL
+	SQL := `WITH cte AS (
+    		SELECT *
+    		FROM   products
+    		WHERE ($1 OR category= $2)  AND
+          	name ILIKE '%' || $3 || '%' AND 
+        	archived_at IS NULL
+			)
+			SELECT id,name,category,price,about,quantity,full_count
+			FROM  (
+          		TABLE  cte
+              	ORDER  BY $4
+              	LIMIT  $5
+              	OFFSET $6
+      		) sub
+          	RIGHT  JOIN (SELECT count(*) FROM products) c(full_count) ON true;`
+	products := make([]models.ProductModelWithCount, 0)
+	pdtList := make([]models.ProductModel, 0)
+	var productsList models.ProductListModel
+	err := database.Aph.Select(&products, SQL, productSearch.CheckCategory, utilities.NewNullString(productSearch.Category), productSearch.Search, productSearch.OrderBy, productSearch.Limit, (productSearch.PageNo-1)*10)
+	if err != nil {
+		log.Printf("FetchProductsSearchHelper Error: %v", err)
+		return productsList, err
+	}
+	var totalCount int
+	for _, pdt := range products {
+		var product models.ProductModel
+		product.ID = pdt.ID
+		product.Name = pdt.Name
+		product.Price = pdt.Price
+		product.About = pdt.About
+		product.Category = pdt.Category
+		product.Quantity = pdt.Quantity
+		pdtList = append(pdtList, product)
+		totalCount = pdt.TotalCount
+	}
+	productsList.TotalCount = totalCount
+	productsList.Products = pdtList
+	return productsList, nil
+}
+func FetchProductsListSearchHelper(productSearch models.ProductListSearchModel) (models.ProductListModel, error) {
+	//language=SQL
+	SQL := `WITH cte AS (
+    		SELECT *
+    		FROM   products
+    		WHERE ($1 OR category=ANY($2))  AND
+          	name ILIKE '%' || $3 || '%' AND 
+        	archived_at IS NULL
+			)
+			SELECT id,name,category,price,about,quantity,full_count
+			FROM  (
+          		TABLE  cte
+              	ORDER  BY $4
+              	LIMIT  $5
+              	OFFSET $6
+      		) sub
+          	RIGHT  JOIN (SELECT count(*) FROM products) c(full_count) ON true;`
+	products := make([]models.ProductModelWithCount, 0)
+	pdtList := make([]models.ProductModel, 0)
+	var productsList models.ProductListModel
+	err := database.Aph.Select(&products, SQL, productSearch.CheckCategory, pq.StringArray(productSearch.Category), productSearch.Search, productSearch.OrderBy, productSearch.Limit, (productSearch.PageNo-1)*10)
+	if err != nil {
+		log.Printf("FetchProductsListSearchHelper Error: %v", err)
+		return productsList, err
+	}
+	var totalCount int
+	for _, pdt := range products {
+		var product models.ProductModel
+		product.ID = pdt.ID
+		product.Name = pdt.Name
+		product.Price = pdt.Price
+		product.About = pdt.About
+		product.Category = pdt.Category
+		product.Quantity = pdt.Quantity
+		pdtList = append(pdtList, product)
+		totalCount = pdt.TotalCount
+	}
+	productsList.TotalCount = totalCount
+	productsList.Products = pdtList
+	return productsList, nil
 }

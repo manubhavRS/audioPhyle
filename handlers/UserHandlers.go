@@ -21,26 +21,29 @@ func AdminSignUpUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	addUser.Role = "admin"
+
 	userID, err := helper.SignUpUserHelper(addUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	var user models.UserModel
 	user.ID = userID
 	tokenString, err := middlewares.GenerateJWT(&user)
+
 	w.Header().Set("Content-Type", "application/json")
-	resp := make(map[string]string)
-	resp["Name"] = "token"
-	resp["Value"] = tokenString
-	resp["Expires"] = utilities.FetchExpireTime().String()
-	jsonResponse, err := utilities.JsonData(resp)
+	jsonResponse, err := utilities.TokenResponse(tokenString)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 func SignUpUserHandler(w http.ResponseWriter, r *http.Request) {
 	var addUser models.AddUserModel
@@ -51,26 +54,29 @@ func SignUpUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	addUser.Role = "user"
+
 	userID, err := helper.SignUpUserHelper(addUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	var user models.UserModel
 	user.ID = userID
 	tokenString, err := middlewares.GenerateJWT(&user)
 	w.Header().Set("Content-Type", "application/json")
-	resp := make(map[string]string)
-	resp["Name"] = "token"
-	resp["Value"] = tokenString
-	resp["Expires"] = utilities.FetchExpireTime().String()
-	jsonResponse, err := utilities.JsonData(resp)
+
+	jsonResponse, err := utilities.TokenResponse(tokenString)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func SignInUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +87,7 @@ func SignInUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	user, err := helper.FetchUserCredentialsHelper(credentials.Email)
 	if err != nil && err == sql.ErrNoRows {
 		w.WriteHeader(http.StatusBadRequest)
@@ -89,25 +96,28 @@ func SignInUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	ok := utilities.CheckPasswordHash(credentials.Password, user.Password)
 	if !ok {
 		log.Printf("Password Incorrect.")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
 	tokenString, err := middlewares.GenerateJWT(&user)
 	w.Header().Set("Content-Type", "application/json")
-	resp := make(map[string]string)
-	resp["Name"] = "token"
-	resp["Value"] = tokenString
-	resp["Expires"] = utilities.FetchExpireTime().String()
-	jsonResponse, err := utilities.JsonData(resp)
+	jsonResponse, err := utilities.TokenResponse(tokenString)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 func AddAdminRoleHandler(w http.ResponseWriter, r *http.Request) {
 	role := "admin"
@@ -118,6 +128,7 @@ func AddAdminRoleHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	err = helper.AddRoleHelper(user.ID, role)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -130,13 +141,19 @@ func FetchAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	jsonResponse, err := utilities.JsonData(user)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func FetchUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +164,7 @@ func FetchUserHandler(w http.ResponseWriter, r *http.Request) {
 	addresses := make([]models.AddressModel, 0)
 	cards := make([]models.CardModel, 0)
 	var err error
+
 	egp.Go(func() error {
 		addresses, err = helper.FetchAddressesHelper(signedUser.ID)
 		return err
@@ -155,22 +173,31 @@ func FetchUserHandler(w http.ResponseWriter, r *http.Request) {
 		cards, err = helper.FetchCardsHelper(signedUser.ID)
 		return err
 	})
+
 	userDetails.ID = signedUser.ID
 	userDetails.Name = signedUser.Name
 	userDetails.Email = signedUser.Email
 	userDetails.Role = signedUser.Role
+
 	txErr := egp.Wait() //  waiting for secondary information
 	if txErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	userDetails.Address = addresses
 	userDetails.Card = cards
+
 	jsonResponse, err := utilities.JsonData(userDetails)
 	if err != nil {
 		log.Printf("Error happened in JSON marshal. Err: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

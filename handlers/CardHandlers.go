@@ -20,11 +20,13 @@ func AddCardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	card.UserID = signedUser.ID
+
 	if len(card.CardNumber) > 12 {
 		log.Printf("AddCardHandler: Invalid Card Number")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	expDate, err := time.Parse("01-06", card.ExpireDate)
 	if err != nil {
 		log.Printf("AddCardHandler: %v", err)
@@ -36,14 +38,18 @@ func AddCardHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	card.Expiry = expDate
+
 	cardID, err := helper.AddCardHelper(card)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(cardID))
+	_, err = w.Write([]byte(cardID))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 func RemoveCardHandler(w http.ResponseWriter, r *http.Request) {
 	signedUser := middlewares.UserFromContext(r.Context())
@@ -55,6 +61,7 @@ func RemoveCardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	card.UserID = signedUser.ID
+
 	err = helper.RemoveCardHelper(card)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

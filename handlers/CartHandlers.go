@@ -22,12 +22,19 @@ func AddCartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cart.UserID = signedUser.ID
 	var cartID string
+
 	cart.TotalCost, err = helper.FetchTotalCostHelper(cart.Products)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	txErr := database.Tx(func(tx *sqlx.Tx) error {
 		cartID, err := helper.AddCartHelper(cart, tx)
 		if err != nil {
 			return err
 		}
+
 		err = helper.AddCartProductsHelper(cartID, cart.Products, tx)
 		return err
 	})
@@ -35,7 +42,10 @@ func AddCartHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(cartID))
+	_, err = w.Write([]byte(cartID))
+	if err != nil {
+		return
+	}
 }
 func UpdateCartProductsHandler(w http.ResponseWriter, r *http.Request) {
 	signedUser := middlewares.UserFromContext(r.Context())
@@ -47,17 +57,25 @@ func UpdateCartProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cart.UserID = signedUser.ID
+
 	txErr := database.Tx(func(tx *sqlx.Tx) error {
 		err := helper.UpdateCartProductHelper(cart, tx)
 		if err != nil {
 			return err
 		}
+
 		err = helper.RemoveCartProductHelper(tx)
 		if err != nil {
 			return err
 		}
+
 		cart.TotalCost, err = helper.FetchTotalCostHelper(cart.Products)
+		if err != nil {
+			return err
+		}
+
 		err = helper.UpdateCartCostHelper(cart.CartID, cart.TotalCost, tx)
+
 		return err
 	})
 	if txErr != nil {
@@ -76,13 +94,20 @@ func AddCartProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cart.UserID = signedUser.ID
 	var cartID string
+
 	cart.TotalCost, err = helper.FetchTotalCostHelper(cart.Products)
+
 	txErr := database.Tx(func(tx *sqlx.Tx) error {
 		err = helper.AddCartProductsHelper(cartID, cart.Products, tx)
 		if err != nil {
 			return err
 		}
+
 		cart.TotalCost, err = helper.FetchTotalCostHelper(cart.Products)
+		if err != nil {
+			return err
+		}
+
 		err = helper.UpdateCartCostHelper(cart.CartID, cart.TotalCost, tx)
 		return err
 	})
@@ -90,5 +115,9 @@ func AddCartProductHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(cartID))
+	_, err = w.Write([]byte(cartID))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

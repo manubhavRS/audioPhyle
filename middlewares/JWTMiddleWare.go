@@ -27,7 +27,7 @@ func (rec *statusRecorder) WriteHeader(code int) {
 	rec.ResponseWriter.WriteHeader(code)
 }
 
-var secretkey string = os.Getenv("secretKey")
+var secretkey = os.Getenv("secretKey")
 
 func GenerateJWT(user *models.UserModel) (string, error) {
 
@@ -98,7 +98,11 @@ func JWTAuthMiddleware(handler http.Handler) http.Handler {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
-				w.Write(jsonResponse)
+				_, err = w.Write(jsonResponse)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
 			}
 
 		}
