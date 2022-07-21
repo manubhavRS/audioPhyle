@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
+	"log"
 
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 
@@ -31,10 +32,12 @@ func ConnectAndMigrate(host, port, databaseName, user, password string, sslMode 
 	DB, err := sqlx.Open("postgres", connStr)
 
 	if err != nil {
+		log.Panicf("error: %v", err)
 		return err
 	}
 	err = DB.Ping()
 	if err != nil {
+		log.Panicf("error: %v", err)
 		return err
 	}
 	Aph = DB

@@ -13,7 +13,9 @@ type Server struct {
 
 func SetupRoutes() *Server {
 	router := chi.NewRouter()
+	router.Get("/", Anyfunc)
 	router.Route("/api", func(api chi.Router) {
+		api.Get("/health", Anyfunc)
 		api.Post("/sign-in", handlers.SignInUserHandler)
 		api.Post("/sign-up", handlers.SignUpUserHandler)
 		api.Route("/auth", func(auth chi.Router) {
@@ -54,6 +56,7 @@ func SetupRoutes() *Server {
 			})
 		})
 	})
+
 	return &Server{router}
 }
 

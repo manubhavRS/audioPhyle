@@ -4,12 +4,35 @@ services:
     container_name: postgresAph
     image: "postgres:13"
     ports:
-      - "5435:5432"
+      - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER="${POSTGRES_USER}"
-      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
-      - POSTGRES_DB="${POSTGRES_DB}"
+      - POSTGRES_USER=local
+      - POSTGRES_PASSWORD=local
+      - POSTGRES_DB=audioPhile
+      - POSTGRES_HOST=localhost
     env_file:
       - .env
+  server:
+    container_name: golang
+    image: "63a4f7e5e3ca"
+    ports:
+      - "8080:8080"
+    environment:
+      - bucketName="${bucketName}"
+      - database=audioPhile
+      - host=172.18.0.2
+      - password=local
+      - port=5432
+      - secretKey="${secretKey}"
+      - serviceKey="${serviceKey}"
+      - user=local
+    env_file:
+      - .env
+    links:
+      - db
+    depends_on:
+      - db
+    external_links:
+      - db
