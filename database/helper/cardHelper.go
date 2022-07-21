@@ -22,9 +22,10 @@ func AddCardHelper(card models.AddCardModel) (string, error) {
 func RemoveCardHelper(card models.RemoveCardIDModel) error {
 	//language=SQL
 	SQL := `UPDATE cards
-  		    SET archived_at=CURRENT_TIMESTAMP
+  		    SET archived_at=now()
   		    WHERE id=$1 and user_id=$2
   		    RETURNING id`
+
 	err := database.Aph.Get(SQL, card.CardID, card.UserID)
 	if err != nil {
 		log.Printf("RemoveCardHelper Error: %v", err)

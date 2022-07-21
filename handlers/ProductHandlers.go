@@ -9,7 +9,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func AddCategoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -83,86 +82,86 @@ func AddProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func FetchProductsHandler(w http.ResponseWriter, r *http.Request) {
-	pageNo := r.URL.Query().Get("pageNo")
-	products, err := helper.FetchProductsHelper(pageNo)
-	if err != nil {
-		log.Printf("FetchProductsHandler : %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+//func FetchProductsHandler(w http.ResponseWriter, r *http.Request) {
+//	pageNo := r.URL.Query().Get("pageNo")
+//	products, err := helper.FetchProductsHelper(pageNo)
+//	if err != nil {
+//		log.Printf("FetchProductsHandler : %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//
+//	jsonResponse, err := utilities.JsonData(products)
+//	if err != nil {
+//		log.Printf("Error happened in JSON marshal. Err: %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//
+//	}
+//	_, err = w.Write(jsonResponse)
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//}
 
-	jsonResponse, err := utilities.JsonData(products)
-	if err != nil {
-		log.Printf("Error happened in JSON marshal. Err: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-
-	}
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func FetchProductsCategoryHandler(w http.ResponseWriter, r *http.Request) {
-	pageNo := r.URL.Query().Get("pageNo")
-	category := r.URL.Query().Get("category")
-	products := make([]models.ProductModel, 0)
-	products, err := helper.FetchProductsCategoryHelper(pageNo, category)
-	if err != nil {
-		log.Printf("FetchProductsHandler : %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	jsonResponse, err := utilities.JsonData(products)
-	if err != nil {
-		log.Printf("Error happened in JSON marshal. Err: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-func FetchLatestProductHandler(w http.ResponseWriter, r *http.Request) {
-	product, err := helper.FetchLatestProductHelper()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	jsonResponse, err := utilities.JsonData(product)
-	if err != nil {
-		log.Printf("Error happened in JSON marshal. Err: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-func FetchYouMayLike(w http.ResponseWriter, r *http.Request) {
-	product, err := helper.FetchYouMayLikeHelper()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	jsonResponse, err := utilities.JsonData(product)
-	if err != nil {
-		log.Printf("Error happened in JSON marshal. Err: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
+//func FetchProductsCategoryHandler(w http.ResponseWriter, r *http.Request) {
+//	pageNo := r.URL.Query().Get("pageNo")
+//	category := r.URL.Query().Get("category")
+//	products := make([]models.ProductModel, 0)
+//	products, err := helper.FetchProductsCategoryHelper(pageNo, category)
+//	if err != nil {
+//		log.Printf("FetchProductsHandler : %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//	jsonResponse, err := utilities.JsonData(products)
+//	if err != nil {
+//		log.Printf("Error happened in JSON marshal. Err: %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//	}
+//	_, err = w.Write(jsonResponse)
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//}
+//func FetchLatestProductHandler(w http.ResponseWriter, r *http.Request) {
+//	product, err := helper.FetchLatestProductHelper()
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//	jsonResponse, err := utilities.JsonData(product)
+//	if err != nil {
+//		log.Printf("Error happened in JSON marshal. Err: %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//	_, err = w.Write(jsonResponse)
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//}
+//func FetchYouMayLike(w http.ResponseWriter, r *http.Request) {
+//	product, err := helper.FetchYouMayLikeHelper()
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//	jsonResponse, err := utilities.JsonData(product)
+//	if err != nil {
+//		log.Printf("Error happened in JSON marshal. Err: %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//	_, err = w.Write(jsonResponse)
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//}
 func FetchProductAssetsHandler(w http.ResponseWriter, r *http.Request) {
 	var productID models.ProductID
 	err := json.NewDecoder(r.Body).Decode(&productID)
@@ -193,52 +192,52 @@ func FetchProductAssetsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func FetchProductsSearchHandler(w http.ResponseWriter, r *http.Request) {
-	var productSearch models.ProductSearchModel
-	pageNo := r.URL.Query().Get("pageNo")
-	productSearch.Category = r.URL.Query().Get("category")
-	productSearch.Search = r.URL.Query().Get("search")
-	limit := r.URL.Query().Get("limit")
-	productSearch.Latest = r.URL.Query().Get("latest")
-	productSearch.YML = r.URL.Query().Get("youMayLike")
-	if productSearch.Category == "" {
-		productSearch.CheckCategory = "true"
-	} else {
-		productSearch.CheckCategory = "false"
-	}
-	if productSearch.Latest == "true" && productSearch.YML == "true" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if productSearch.Latest == "true" {
-		productSearch.Limit = 1
-		productSearch.OrderBy = "created_by DESC"
-		productSearch.PageNo = 1
-	} else if productSearch.YML == "true" {
-		productSearch.Limit = 5
-		productSearch.OrderBy = "RANDOM ()"
-		productSearch.PageNo = 1
-	} else {
-		productSearch.PageNo, _ = strconv.Atoi(pageNo)
-		productSearch.Limit, _ = strconv.Atoi(limit)
-	}
-	products, err := helper.FetchProductsSearchHelper(productSearch)
-	if err != nil {
-		log.Printf("FetchProductsSearchHandler : %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	jsonResponse, err := utilities.JsonData(products)
-	if err != nil {
-		log.Printf("Error happened in JSON marshal. Err: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
+//func FetchProductsSearchHandler(w http.ResponseWriter, r *http.Request) {
+//	var productSearch models.ProductSearchModel
+//	pageNo := r.URL.Query().Get("pageNo")
+//	productSearch.Category = r.URL.Query().Get("category")
+//	productSearch.Search = r.URL.Query().Get("search")
+//	limit := r.URL.Query().Get("limit")
+//	productSearch.Latest = r.URL.Query().Get("latest")
+//	productSearch.YML = r.URL.Query().Get("youMayLike")
+//	if productSearch.Category == "" {
+//		productSearch.CheckCategory = "true"
+//	} else {
+//		productSearch.CheckCategory = "false"
+//	}
+//	if productSearch.Latest == "true" && productSearch.YML == "true" {
+//		w.WriteHeader(http.StatusBadRequest)
+//		return
+//	}
+//	if productSearch.Latest == "true" {
+//		productSearch.Limit = 1
+//		productSearch.OrderBy = "created_by DESC"
+//		productSearch.PageNo = 1
+//	} else if productSearch.YML == "true" {
+//		productSearch.Limit = 5
+//		productSearch.OrderBy = "RANDOM ()"
+//		productSearch.PageNo = 1
+//	} else {
+//		productSearch.PageNo, _ = strconv.Atoi(pageNo)
+//		productSearch.Limit, _ = strconv.Atoi(limit)
+//	}
+//	products, err := helper.FetchProductsSearchHelper(productSearch)
+//	if err != nil {
+//		log.Printf("FetchProductsSearchHandler : %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//	jsonResponse, err := utilities.JsonData(products)
+//	if err != nil {
+//		log.Printf("Error happened in JSON marshal. Err: %v", err)
+//		w.WriteHeader(http.StatusInternalServerError)
+//	}
+//	_, err = w.Write(jsonResponse)
+//	if err != nil {
+//		w.WriteHeader(http.StatusInternalServerError)
+//		return
+//	}
+//}
 
 func FetchProductsListSearchHandler(w http.ResponseWriter, r *http.Request) {
 	productSearch, err, ret := utilities.ArgumentsMapping(r)

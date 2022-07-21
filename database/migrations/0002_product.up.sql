@@ -15,3 +15,5 @@ CREATE TABLE products(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     archived_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
+CREATE INDEX idx_products
+    ON products(id,name,category,price,about,quantity);
