@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5435/audioPhile</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="audioPhile@172.18.0.2" uuid="dfa14d33-2de1-4b02-975b-bcee083eff12">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://172.18.0.2:5432/audioPhile</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
