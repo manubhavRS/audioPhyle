@@ -28,4 +28,4 @@ jobs:
       # Runs a single command using the runners shell
       
       - name: docker-compose
-        run: docker-compose up
+        run: docker-compose -f "docker-compose.yml" up -d --env-file .env --build
