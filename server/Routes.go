@@ -15,7 +15,7 @@ func SetupRoutes() *Server {
 	router := chi.NewRouter()
 	router.Get("/", Anyfunc)
 	router.Route("/api", func(api chi.Router) {
-		api.Get("/health", Anyfunc)
+		//	api.Get("/health", Anyfunc)
 		api.Post("/sign-in", handlers.SignInUserHandler)
 		api.Post("/sign-up", handlers.SignUpUserHandler)
 		api.Route("/auth", func(auth chi.Router) {
@@ -25,9 +25,11 @@ func SetupRoutes() *Server {
 				admin.Post("/sign-up", handlers.AdminSignUpUserHandler)
 				admin.Post("/add-product", handlers.AddProductHandler)
 				admin.Post("/add-role", handlers.AddAdminRoleHandler)
-				admin.Get("/all-users", handlers.FetchAllUsersHandler)
+				//admin.Get("/all-users", handlers.FetchAllUsersHandler)
 				admin.Post("/upload-asset", handlers.FireBaseUploadHandler)
 				admin.Post("/add-category", handlers.AddCategoryHandler)
+				admin.Delete("/remove-category", handlers.RemoveCategoryHandler)
+				admin.Delete("/remove-product", handlers.RemoveProductHandler)
 				admin.Get("/fetch-categories", handlers.FetchCategoryHandler)
 				admin.Get("/fetch-product-assets", handlers.FetchProductAssetsHandler)
 				admin.Get("/fetch-search-products-list", handlers.FetchProductsListSearchHandler)

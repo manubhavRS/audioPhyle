@@ -45,6 +45,7 @@ func AddCartHelper(cart models.AddCartModel, tx *sqlx.Tx) (string, error) {
 		log.Printf("AddCartHelper Error: %v", err)
 		return "", err
 	}
+	log.Printf(cartID)
 	return cartID, nil
 }
 func AddCartProductsHelper(cartID string, products []models.AddCartProductModel, tx *sqlx.Tx) error {
@@ -105,18 +106,21 @@ func UpdateCartProductHelper(cart models.UpdateCartModel, tx *sqlx.Tx) error {
 	}
 	psql := sqrl.StatementBuilder
 	insertBuilder := psql.Update("cart_products")
-	insertCase := sqrl.Case("id")
+	insertCase := sqrl.Case("product_id")
 	for i, productID := range productIDs {
 		insertCase.When(`'`+productID+`'`, strconv.Itoa(cart.Products[i].Quantity))
 	}
 	insertBuilder.Set("quantity", insertCase)
-	insertBuilder.Where("id=?", cart.CartID)
+	insertBuilder.Where("cart_id=" + `'` + cart.CartID + `'`)
+	insertBuilder.Where("product_id in (?)")
 	insertBuilder.Where("archived_at IS NULL")
 	sql, args, err := insertBuilder.ToSql()
 	if err != nil {
 		log.Printf("UpdateCartProductHelper Error: %v", err)
 		return err
 	}
+	sql, args, err = sqlx.In(sql, productIDs)
+	sql = database.Aph.Rebind(sql)
 	_, err = tx.Exec(sql, args...)
 	if err != nil {
 		log.Printf("UpdateCartProductHelper Error: %v", err)

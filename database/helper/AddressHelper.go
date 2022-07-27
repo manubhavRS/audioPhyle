@@ -25,7 +25,7 @@ func RemoveAddressHelper(address models.RemoveAddressIDModel) error {
   		    SET archived_at=CURRENT_TIMESTAMP
   		    WHERE id=$1 and user_id=$2
   		    RETURNING id`
-	err := database.Aph.Get(SQL, address.AddressID, address.UserID)
+	_, err := database.Aph.Exec(SQL, address.AddressID, address.UserID)
 	if err != nil {
 		log.Printf("RemoveAddressHelper Error: %v", err)
 		return err

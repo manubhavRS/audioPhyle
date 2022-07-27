@@ -26,7 +26,7 @@ func RemoveCardHelper(card models.RemoveCardIDModel) error {
   		    WHERE id=$1 and user_id=$2
   		    RETURNING id`
 
-	err := database.Aph.Get(SQL, card.CardID, card.UserID)
+	_, err := database.Aph.Exec(SQL, card.CardID, card.UserID)
 	if err != nil {
 		log.Printf("RemoveCardHelper Error: %v", err)
 		return err

@@ -315,3 +315,29 @@ func FetchProductsListSearchHelper(productSearch models.ProductListSearchModel) 
 	productsList.Products = pdtList
 	return productsList, nil
 }
+func RemoveCategoryHelper(category models.CategoryID) error {
+	//language=SQL
+	SQL := `UPDATE categories
+  		    SET archived_at=CURRENT_TIMESTAMP
+  		    WHERE id=$1 
+  		    RETURNING id`
+	_, err := database.Aph.Exec(SQL, category.ID)
+	if err != nil {
+		log.Printf("RemoveCategoryHelper Error: %v", err)
+		return err
+	}
+	return err
+}
+func RemoveProductHelper(product models.ProductID) error {
+	//language=SQL
+	SQL := `UPDATE products
+  		    SET archived_at=CURRENT_TIMESTAMP
+  		    WHERE id=$1 
+  		    RETURNING id`
+	_, err := database.Aph.Exec(SQL, product.ID)
+	if err != nil {
+		log.Printf("RemoveProductHelper Error: %v", err)
+		return err
+	}
+	return err
+}

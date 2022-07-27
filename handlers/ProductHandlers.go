@@ -263,3 +263,31 @@ func FetchProductsListSearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+func RemoveCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	var category models.CategoryID
+	err := json.NewDecoder(r.Body).Decode(&category)
+	if err != nil {
+		log.Printf("AddAddressHandler: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = helper.RemoveCategoryHelper(category)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+func RemoveProductHandler(w http.ResponseWriter, r *http.Request) {
+	var product models.ProductID
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		log.Printf("RemoveProductHandler: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = helper.RemoveProductHelper(product)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

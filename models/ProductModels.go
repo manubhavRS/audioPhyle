@@ -42,6 +42,9 @@ type ImageStructure struct {
 type ProductID struct {
 	ID string `db:"id" json:"id"`
 }
+type CategoryID struct {
+	ID string `db:"id" json:"id"`
+}
 type ProductSearchModel struct {
 	PageNo        int
 	Category      string

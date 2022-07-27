@@ -115,6 +115,9 @@ func NewNullString(s string) sql.NullString {
 func ArgumentsMapping(r *http.Request) (models.ProductListSearchModel, error, int) {
 	var productSearch models.ProductListSearchModel
 	pageNo := r.URL.Query().Get("pageNo")
+	if pageNo == "" {
+		pageNo = "1"
+	}
 	if r.URL.Query().Get("category") != "" {
 		productSearch.Category = strings.Split(r.URL.Query().Get("category"), ",")
 	}

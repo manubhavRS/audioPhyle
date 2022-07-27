@@ -28,13 +28,11 @@ func AddCartHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	txErr := database.Tx(func(tx *sqlx.Tx) error {
-		cartID, err := helper.AddCartHelper(cart, tx)
+		cartID, err = helper.AddCartHelper(cart, tx)
 		if err != nil {
 			return err
 		}
-
 		err = helper.AddCartProductsHelper(cartID, cart.Products, tx)
 		return err
 	})
